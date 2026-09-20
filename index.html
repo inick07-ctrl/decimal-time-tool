@@ -10,14 +10,14 @@
       --bg: #1a1c1e;
       --shell: #2a2e32;
       --shell-edge: #141618;
-      --lcd: #c5d4a3;
-      --lcd-dim: #8a9a6a;
-      --lcd-bg: #1e2818;
+      --lcd: #f0ebe3;
+      --lcd-dim: #b0aaa0;
+      --lcd-bg: #22252a;
       --key: #3a4048;
       --key-text: #f0f2f5;
       --key-op: #5a6570;
-      --key-accent: #7a8454;
-      --key-accent-text: #14180e;
+      --key-accent: #e8e2d6;
+      --key-accent-text: #1a1c1e;
       --key-warn: #8b4a3a;
       --muted: #9aa3ad;
       --line: #3d444c;
@@ -72,7 +72,7 @@
     }
     .lcd {
       background: var(--lcd-bg);
-      border: 3px solid #0f140c;
+      border: 3px solid #0e1012;
       border-radius: 10px;
       padding: 12px 14px;
       margin-bottom: 14px;
@@ -188,7 +188,7 @@
 
     <!-- PARTS -->
     <section class="panel" id="panel-parts">
-      <p class="hint">Decimal time per part × quantity = total minutes. Numbers before the decimal → minutes (×60).</p>
+      <p class="hint">Decimal time × quantity, then add setup once to the overall total. Numbers before the decimal → minutes (×60).</p>
       <div class="grid-2">
         <div class="field">
           <label for="partDec">Decimal / part</label>
@@ -198,6 +198,10 @@
           <label for="partQty">Quantity</label>
           <input id="partQty" type="number" inputmode="numeric" step="1" min="0" placeholder="100" />
         </div>
+      </div>
+      <div class="field">
+        <label for="partSetup">Setup time (minutes)</label>
+        <input id="partSetup" type="number" inputmode="decimal" step="any" min="0" placeholder="0" />
       </div>
       <div class="lcd">
         <div class="label">Total minutes</div>
@@ -297,6 +301,7 @@
     var minOutDec = document.getElementById("minOutDec");
     var partDec = document.getElementById("partDec");
     var partQty = document.getElementById("partQty");
+    var partSetup = document.getElementById("partSetup");
     var partOutMin = document.getElementById("partOutMin");
     var partOutPretty = document.getElementById("partOutPretty");
     var partEq = document.getElementById("partEq");
@@ -348,6 +353,8 @@
     function updateParts() {
       var d = num(partDec);
       var q = num(partQty);
+      var setupRaw = partSetup.value.trim() === "" ? 0 : num(partSetup);
+      var setup = isFinite(setupRaw) && setupRaw >= 0 ? setupRaw : 0;
       if (!isFinite(d) || !isFinite(q)) {
         partOutMin.textContent = "0";
         partOutPretty.textContent = "";
@@ -356,18 +363,22 @@
       }
       var s = splitDec(d);
       var perMin = s.totalMin;
-      var total = round(perMin * q, 3);
+      var runMin = round(perMin * q, 3);
+      var total = round(runMin + setup, 3);
       partOutMin.textContent = total.toLocaleString(undefined, { maximumFractionDigits: 3 });
       partOutPretty.textContent = total + " min" + (total >= 60 ? " · " + clockFromMin(total) : "");
       partEq.innerHTML =
         "Per part: before decimal <strong>" + s.wholeMin + "</strong> min + after <strong>" + round(s.fracMin, 3) + "</strong> min<br />" +
-        "<strong>" + round(perMin, 3) + "</strong> min × <strong>" + q + "</strong> = <strong>" + total + "</strong> min";
+        "Run: <strong>" + round(perMin, 3) + "</strong> min × <strong>" + q + "</strong> = <strong>" + runMin + "</strong> min<br />" +
+        "Setup: <strong>" + round(setup, 3) + "</strong> min (once)<br />" +
+        "Overall: <strong>" + runMin + "</strong> + <strong>" + round(setup, 3) + "</strong> = <strong>" + total + "</strong> min";
     }
 
     decIn.addEventListener("input", updateFromDec);
     minIn.addEventListener("input", updateFromMin);
     partDec.addEventListener("input", updateParts);
     partQty.addEventListener("input", updateParts);
+    partSetup.addEventListener("input", updateParts);
 
     // Chart
     var body = document.getElementById("chartBody");
