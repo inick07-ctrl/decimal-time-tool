@@ -188,7 +188,7 @@
 
     <!-- PARTS -->
     <section class="panel" id="panel-parts">
-      <p class="hint">Decimal × qty = run minutes. Setup (minutes) adds once to that total — e.g. 24:00 + 5 setup = 29:00. Left of the colon is minutes.</p>
+      <p class="hint">Decimal × qty → run time (clock). Setup minutes add once with clock math — e.g. 24:00 + 5 min = 24:05. Numbers before the decimal → minutes (×60).</p>
       <div class="grid-2">
         <div class="field">
           <label for="partDec">Decimal / part</label>
@@ -204,7 +204,7 @@
         <input id="partSetup" type="number" inputmode="decimal" step="any" min="0" placeholder="0" />
       </div>
       <div class="lcd">
-        <div class="label">Overall (min:sec)</div>
+        <div class="label">Clock total</div>
         <div class="value" id="partOutMin">0:00</div>
         <div class="subline" id="partOutPretty"></div>
       </div>
@@ -278,15 +278,6 @@
       var h = Math.floor(whole / 60);
       var mm = whole % 60;
       return h + ":" + String(mm).padStart(2, "0");
-    }
-    /** Total minutes as M:SS — left side is minutes (can be > 59), not hours. */
-    function minColon(m) {
-      if (!isFinite(m) || m < 0) return "0:00";
-      var whole = Math.floor(m + 1e-9);
-      var secs = Math.round((m - whole) * 60);
-      if (secs >= 60) { whole += 1; secs = 0; }
-      if (secs < 0) secs = 0;
-      return whole + ":" + String(secs).padStart(2, "0");
     }
     function prettyMin(m) {
       var whole = Math.floor(m + 1e-9);
@@ -373,17 +364,16 @@
       var s = splitDec(d);
       var perMin = s.totalMin;
       var runMin = round(perMin * q, 3);
-      // Setup adds only to overall minutes (left of colon), not into per-part math.
-      var total = round(runMin + setup, 3);
-      partOutMin.textContent = minColon(total);
+      // Setup adds once; clock math = (run minutes + setup minutes) → H:MM
+      var totalMin = round(runMin + setup, 3);
+      partOutMin.textContent = clockFromMin(totalMin);
       partOutPretty.textContent =
-        "Run " + minColon(runMin) + " + setup " + minColon(setup) + " = " + minColon(total) +
-        " (" + total + " min)";
+        clockFromMin(runMin) + " run + " + clockFromMin(setup) + " setup";
       partEq.innerHTML =
         "Per part: before decimal <strong>" + s.wholeMin + "</strong> min + after <strong>" + round(s.fracMin, 3) + "</strong> min<br />" +
-        "Run: <strong>" + round(perMin, 3) + "</strong> min × <strong>" + q + "</strong> = <strong>" + minColon(runMin) + "</strong><br />" +
-        "Setup: <strong>" + minColon(setup) + "</strong> (added once to overall)<br />" +
-        "Overall: <strong>" + minColon(runMin) + "</strong> + <strong>" + minColon(setup) + "</strong> = <strong>" + minColon(total) + "</strong>";
+        "Run: <strong>" + round(perMin, 3) + "</strong> min × <strong>" + q + "</strong> = <strong>" + clockFromMin(runMin) + "</strong><br />" +
+        "Setup: <strong>" + clockFromMin(setup) + "</strong> (once)<br />" +
+        "Clock total: <strong>" + clockFromMin(runMin) + "</strong> + <strong>" + clockFromMin(setup) + "</strong> = <strong>" + clockFromMin(totalMin) + "</strong>";
     }
 
     decIn.addEventListener("input", updateFromDec);
