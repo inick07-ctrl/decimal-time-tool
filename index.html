@@ -162,7 +162,7 @@
   <div class="calc-shell">
     <!-- CONVERT -->
     <section class="panel on" id="panel-convert">
-      <p class="hint">Type a <strong>decimal hour</strong>. Digits <strong>before</strong> the decimal = whole hours → minutes (×60). Digits <strong>after</strong> = fraction of an hour → minutes.</p>
+      <p class="hint">Type a <strong>decimal hour</strong>. Numbers <strong>before</strong> the decimal → <strong>minutes</strong> (×60). Numbers <strong>after</strong> → minutes (fraction ×60).</p>
       <div class="field">
         <label for="decIn">Decimal hours</label>
         <input id="decIn" type="number" inputmode="decimal" step="any" min="0" placeholder="0.00" />
@@ -170,11 +170,11 @@
       <div class="lcd">
         <div class="label">Total minutes</div>
         <div class="value" id="decOutMin">0</div>
-        <div class="subline" id="decOutPretty">0 hrs + 0 min</div>
+        <div class="subline" id="decOutPretty">0 min</div>
       </div>
       <div class="breakdown" id="decBreak">
-        Before decimal: <strong>0</strong> hr → <strong>0</strong> min<br />
-        After decimal: <strong>0.00</strong> → <strong>0</strong> min
+        Before decimal: <strong>0</strong> min<br />
+        After decimal: <strong>0</strong> min
       </div>
       <div class="field" style="margin-top:14px">
         <label for="minIn">Or enter minutes</label>
@@ -188,7 +188,7 @@
 
     <!-- PARTS -->
     <section class="panel" id="panel-parts">
-      <p class="hint">Decimal time per part × quantity = total minutes. Whole hours before the decimal still convert ×60.</p>
+      <p class="hint">Decimal time per part × quantity = total minutes. Numbers before the decimal → minutes (×60).</p>
       <div class="grid-2">
         <div class="field">
           <label for="partDec">Decimal / part</label>
@@ -243,11 +243,11 @@
 
     <!-- CHART -->
     <section class="panel" id="panel-chart">
-      <p class="hint">Decimal hours → minutes. Before-decimal hours × 60.</p>
+      <p class="hint">Decimal hours → minutes. Before decimal → minutes (×60).</p>
       <div class="chart-wrap">
         <table>
           <thead>
-            <tr><th>Decimal</th><th>Before→min</th><th>After→min</th><th>Total min</th><th>Clock</th></tr>
+            <tr><th>Decimal</th><th>Before (min)</th><th>After (min)</th><th>Total min</th><th>Clock</th></tr>
           </thead>
           <tbody id="chartBody"></tbody>
         </table>
@@ -306,17 +306,17 @@
       var d = num(decIn);
       if (!isFinite(d)) {
         decOutMin.textContent = "0";
-        decOutPretty.textContent = "0 hrs + 0 min";
-        decBreak.innerHTML = "Before decimal: <strong>0</strong> hr → <strong>0</strong> min<br />After decimal: <strong>0.00</strong> → <strong>0</strong> min";
+        decOutPretty.textContent = "0 min";
+        decBreak.innerHTML = "Before decimal: <strong>0</strong> min<br />After decimal: <strong>0</strong> min";
         return;
       }
       var s = splitDec(d);
       var total = round(s.totalMin, 3);
       decOutMin.textContent = total.toLocaleString(undefined, { maximumFractionDigits: 3 });
-      decOutPretty.textContent = prettyMin(total) + " · " + clockFromMin(total);
+      decOutPretty.textContent = total + " min · " + clockFromMin(total);
       decBreak.innerHTML =
-        "Before decimal: <strong>" + s.whole + "</strong> hr → <strong>" + s.wholeMin + "</strong> min<br />" +
-        "After decimal: <strong>" + round(s.frac, 4).toFixed(4).replace(/0+$/, "0").replace(/\.$/, "") + "</strong> → <strong>" + round(s.fracMin, 3) + "</strong> min";
+        "Before decimal: <strong>" + s.wholeMin + "</strong> min<br />" +
+        "After decimal: <strong>" + round(s.fracMin, 3) + "</strong> min";
       if (!syncing) {
         syncing = true;
         minIn.value = String(total);
@@ -338,10 +338,10 @@
         var s = splitDec(d);
         var total = round(s.totalMin, 3);
         decOutMin.textContent = total.toLocaleString(undefined, { maximumFractionDigits: 3 });
-        decOutPretty.textContent = prettyMin(total) + " · " + clockFromMin(total);
+        decOutPretty.textContent = total + " min · " + clockFromMin(total);
         decBreak.innerHTML =
-          "Before decimal: <strong>" + s.whole + "</strong> hr → <strong>" + s.wholeMin + "</strong> min<br />" +
-          "After decimal: <strong>" + round(s.frac, 4) + "</strong> → <strong>" + round(s.fracMin, 3) + "</strong> min";
+          "Before decimal: <strong>" + s.wholeMin + "</strong> min<br />" +
+          "After decimal: <strong>" + round(s.fracMin, 3) + "</strong> min";
         syncing = false;
       }
     }
@@ -358,9 +358,9 @@
       var perMin = s.totalMin;
       var total = round(perMin * q, 3);
       partOutMin.textContent = total.toLocaleString(undefined, { maximumFractionDigits: 3 });
-      partOutPretty.textContent = prettyMin(total) + (total >= 60 ? " · " + clockFromMin(total) : "");
+      partOutPretty.textContent = total + " min" + (total >= 60 ? " · " + clockFromMin(total) : "");
       partEq.innerHTML =
-        "Per part: before <strong>" + s.whole + "</strong> hr → <strong>" + s.wholeMin + "</strong> min, after → <strong>" + round(s.fracMin, 3) + "</strong> min<br />" +
+        "Per part: before decimal <strong>" + s.wholeMin + "</strong> min + after <strong>" + round(s.fracMin, 3) + "</strong> min<br />" +
         "<strong>" + round(perMin, 3) + "</strong> min × <strong>" + q + "</strong> = <strong>" + total + "</strong> min";
     }
 
