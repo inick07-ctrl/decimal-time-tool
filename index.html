@@ -3,187 +3,286 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#0b0d10" />
+  <meta name="theme-color" content="#1a1c1e" />
   <title>Decimal Time Calculator</title>
   <style>
     :root {
-      --bg: #0b0d10;
-      --surface: #12161c;
-      --card: #1a2028;
-      --line: #2c3542;
-      --text: #f3f5f7;
-      --muted: #8b949e;
-      --olive: #7a8454;
-      --olive-dim: #4a5234;
-      --green: #3ecf8e;
-      --tap: 48px;
-      --radius: 14px;
+      --bg: #1a1c1e;
+      --shell: #2a2e32;
+      --shell-edge: #141618;
+      --lcd: #c5d4a3;
+      --lcd-dim: #8a9a6a;
+      --lcd-bg: #1e2818;
+      --key: #3a4048;
+      --key-text: #f0f2f5;
+      --key-op: #5a6570;
+      --key-accent: #7a8454;
+      --key-accent-text: #14180e;
+      --key-warn: #8b4a3a;
+      --muted: #9aa3ad;
+      --line: #3d444c;
       --safe-b: env(safe-area-inset-bottom, 0px);
       --safe-t: env(safe-area-inset-top, 0px);
     }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     html, body {
       margin: 0; padding: 0;
-      background: var(--bg); color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      font-size: 17px; line-height: 1.35; min-height: 100%;
+      background: var(--bg); color: var(--key-text);
+      font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100%;
     }
     body {
-      padding: calc(14px + var(--safe-t)) 16px calc(28px + var(--safe-b));
-      max-width: 560px; margin: 0 auto;
+      padding: calc(12px + var(--safe-t)) 14px calc(24px + var(--safe-b));
+      max-width: 420px; margin: 0 auto;
     }
-    h1 { margin: 0 0 6px; font-size: 1.7rem; font-weight: 800; letter-spacing: -0.03em; }
-    .sub { color: var(--muted); margin: 0 0 18px; font-size: 0.95rem; }
+    h1 {
+      margin: 0 0 4px; font-size: 1.15rem; font-weight: 800;
+      letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted);
+      text-align: center;
+    }
+    .sub {
+      text-align: center; color: var(--muted); font-size: 0.85rem;
+      margin: 0 0 14px;
+    }
     .tabs {
-      display: flex; gap: 6px; margin-bottom: 16px;
-      background: var(--surface); border: 1px solid var(--line);
-      border-radius: 12px; padding: 4px;
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;
+      margin-bottom: 12px;
     }
     .tab {
-      flex: 1; min-height: var(--tap); border: 0; border-radius: 10px;
-      background: transparent; color: var(--muted); font: inherit; font-weight: 800;
-      font-size: 0.82rem; letter-spacing: 0.04em; text-transform: uppercase; cursor: pointer;
+      min-height: 42px; border: 1px solid var(--line); border-radius: 8px;
+      background: var(--shell); color: var(--muted); font: inherit;
+      font-size: 0.72rem; font-weight: 800; letter-spacing: 0.04em;
+      text-transform: uppercase; cursor: pointer;
     }
-    .tab.on { background: var(--olive); color: #14180e; }
+    .tab.on {
+      background: var(--key-accent); color: var(--key-accent-text);
+      border-color: var(--key-accent);
+    }
     .panel { display: none; }
     .panel.on { display: block; }
-    .card {
-      background: var(--card); border: 1px solid var(--line);
-      border-radius: var(--radius); padding: 16px; margin-bottom: 14px;
+
+    .calc-shell {
+      background: linear-gradient(165deg, #343a40, var(--shell) 40%, #23272b);
+      border: 2px solid var(--shell-edge);
+      border-radius: 22px;
+      padding: 16px 14px 18px;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.08),
+        0 12px 28px rgba(0,0,0,0.45);
     }
-    .card h2 {
-      margin: 0 0 12px; font-size: 0.78rem; font-weight: 800;
-      letter-spacing: 0.12em; text-transform: uppercase; color: var(--olive);
+    .lcd {
+      background: var(--lcd-bg);
+      border: 3px solid #0f140c;
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.35);
+      min-height: 108px;
     }
-    label {
-      display: block; font-size: 0.85rem; font-weight: 700;
-      color: var(--muted); margin: 0 0 6px;
+    .lcd .label {
+      font-size: 0.7rem; font-weight: 800; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--lcd-dim); margin-bottom: 4px;
     }
-    input[type="number"], input[type="text"] {
-      width: 100%; min-height: var(--tap); border-radius: 12px;
-      border: 1px solid var(--line); background: var(--surface);
-      color: var(--text); font: inherit; font-size: 1.25rem; font-weight: 700;
-      padding: 10px 14px; margin-bottom: 12px;
+    .lcd .value {
+      font-family: "Courier New", Courier, monospace;
+      font-size: 2.35rem; font-weight: 700; color: var(--lcd);
+      letter-spacing: 0.02em; line-height: 1.1;
+      word-break: break-all; min-height: 1.15em;
     }
-    input:focus { outline: 2px solid var(--olive); outline-offset: 1px; }
-    .result {
-      background: #1c2216; border: 1px solid var(--olive-dim);
-      border-radius: 12px; padding: 14px; margin-top: 4px;
+    .lcd .subline {
+      font-family: "Courier New", Courier, monospace;
+      color: var(--lcd-dim); font-size: 0.95rem; margin-top: 6px;
     }
-    .result .kicker {
-      font-size: 0.72rem; font-weight: 800; letter-spacing: 0.12em;
-      text-transform: uppercase; color: var(--muted); margin-bottom: 4px;
+    .field {
+      margin-bottom: 10px;
     }
-    .result .big {
-      font-size: 2rem; font-weight: 800; letter-spacing: -0.03em;
-      font-variant-numeric: tabular-nums; color: #c5cc9a;
+    .field label {
+      display: block; font-size: 0.72rem; font-weight: 800;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 5px;
     }
-    .result .sec { color: var(--muted); font-size: 0.95rem; margin-top: 4px; }
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    table {
-      width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums;
+    .field input {
+      width: 100%; min-height: 48px; border-radius: 10px;
+      border: 2px solid #0f1214; background: #12151a;
+      color: var(--lcd); font-family: "Courier New", Courier, monospace;
+      font-size: 1.45rem; font-weight: 700; padding: 8px 12px;
     }
-    th, td {
-      text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line);
-      font-size: 0.95rem;
+    .field input:focus { outline: 2px solid var(--key-accent); }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .hint {
+      color: var(--muted); font-size: 0.82rem; margin: 0 0 10px; line-height: 1.35;
     }
-    th { color: var(--muted); font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; }
-    tr:last-child td { border-bottom: 0; }
-    .hint { color: var(--muted); font-size: 0.88rem; margin: 0 0 12px; }
-    .eq { color: var(--dim); font-size: 0.85rem; margin-top: 8px; }
+    .breakdown {
+      background: #12151a; border: 1px solid var(--line); border-radius: 10px;
+      padding: 10px 12px; margin-top: 8px; font-size: 0.9rem; color: var(--muted);
+    }
+    .breakdown strong { color: var(--lcd); font-family: "Courier New", monospace; }
+
+    /* Calculator keypad */
+    .keys {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+    }
+    .key {
+      min-height: 54px; border: 0; border-radius: 12px;
+      background: var(--key); color: var(--key-text);
+      font-size: 1.25rem; font-weight: 700; cursor: pointer;
+      box-shadow: 0 3px 0 #1c2024, inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+    .key:active { transform: translateY(2px); box-shadow: 0 1px 0 #1c2024; }
+    .key.op { background: var(--key-op); }
+    .key.accent { background: var(--key-accent); color: var(--key-accent-text); }
+    .key.warn { background: var(--key-warn); color: #fff; }
+    .key.wide { grid-column: span 2; }
+    .key.tall { min-height: 54px; }
+
+    .chart-wrap {
+      max-height: 62vh; overflow: auto; border-radius: 10px;
+      border: 1px solid var(--line); background: #12151a;
+    }
+    table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+    th, td { padding: 9px 10px; border-bottom: 1px solid var(--line); text-align: left; font-size: 0.92rem; }
+    th {
+      position: sticky; top: 0; background: #1a1f24; color: var(--muted);
+      font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase;
+    }
+    td { font-family: "Courier New", monospace; color: var(--lcd); }
   </style>
 </head>
 <body>
   <h1>Decimal Time</h1>
-  <p class="sub">Shop calculator — decimal hours ↔ minutes, plus parts totals.</p>
+  <p class="sub">Shop calculator · hours → minutes · parts</p>
 
   <div class="tabs" role="tablist">
-    <button type="button" class="tab on" data-tab="convert" role="tab" aria-selected="true">Convert</button>
-    <button type="button" class="tab" data-tab="parts" role="tab" aria-selected="false">Parts</button>
-    <button type="button" class="tab" data-tab="chart" role="tab" aria-selected="false">Chart</button>
+    <button type="button" class="tab on" data-tab="convert">Convert</button>
+    <button type="button" class="tab" data-tab="parts">Parts</button>
+    <button type="button" class="tab" data-tab="calc">Calc</button>
+    <button type="button" class="tab" data-tab="chart">Chart</button>
   </div>
 
-  <section class="panel on" id="panel-convert" role="tabpanel">
-    <div class="card">
-      <h2>Decimal → minutes</h2>
-      <p class="hint">Type a decimal hour (e.g. <strong>1.25</strong>) and minutes fill in.</p>
-      <label for="decIn">Decimal hours</label>
-      <input id="decIn" type="number" inputmode="decimal" step="any" min="0" placeholder="e.g. 0.75" />
-      <div class="result">
-        <div class="kicker">Minutes</div>
-        <div class="big" id="decOutMin">—</div>
-        <div class="sec" id="decOutPretty"></div>
+  <div class="calc-shell">
+    <!-- CONVERT -->
+    <section class="panel on" id="panel-convert">
+      <p class="hint">Type a <strong>decimal hour</strong>. Digits <strong>before</strong> the decimal = whole hours → minutes (×60). Digits <strong>after</strong> = fraction of an hour → minutes.</p>
+      <div class="field">
+        <label for="decIn">Decimal hours</label>
+        <input id="decIn" type="number" inputmode="decimal" step="any" min="0" placeholder="0.00" />
       </div>
-    </div>
-    <div class="card">
-      <h2>Minutes → decimal</h2>
-      <p class="hint">Or type minutes and get decimal hours.</p>
-      <label for="minIn">Minutes</label>
-      <input id="minIn" type="number" inputmode="decimal" step="any" min="0" placeholder="e.g. 45" />
-      <div class="result">
-        <div class="kicker">Decimal hours</div>
-        <div class="big" id="minOutDec">—</div>
+      <div class="lcd">
+        <div class="label">Total minutes</div>
+        <div class="value" id="decOutMin">0</div>
+        <div class="subline" id="decOutPretty">0 hrs + 0 min</div>
       </div>
-    </div>
-  </section>
+      <div class="breakdown" id="decBreak">
+        Before decimal: <strong>0</strong> hr → <strong>0</strong> min<br />
+        After decimal: <strong>0.00</strong> → <strong>0</strong> min
+      </div>
+      <div class="field" style="margin-top:14px">
+        <label for="minIn">Or enter minutes</label>
+        <input id="minIn" type="number" inputmode="decimal" step="any" min="0" placeholder="0" />
+      </div>
+      <div class="lcd" style="min-height:72px">
+        <div class="label">Decimal hours</div>
+        <div class="value" id="minOutDec" style="font-size:1.8rem">0</div>
+      </div>
+    </section>
 
-  <section class="panel" id="panel-parts" role="tabpanel">
-    <div class="card">
-      <h2>Parts × decimal time</h2>
-      <p class="hint">Decimal time per part × quantity = total minutes.</p>
+    <!-- PARTS -->
+    <section class="panel" id="panel-parts">
+      <p class="hint">Decimal time per part × quantity = total minutes. Whole hours before the decimal still convert ×60.</p>
       <div class="grid-2">
-        <div>
-          <label for="partDec">Decimal time / part</label>
+        <div class="field">
+          <label for="partDec">Decimal / part</label>
           <input id="partDec" type="number" inputmode="decimal" step="any" min="0" placeholder="0.15" />
         </div>
-        <div>
+        <div class="field">
           <label for="partQty">Quantity</label>
           <input id="partQty" type="number" inputmode="numeric" step="1" min="0" placeholder="100" />
         </div>
       </div>
-      <div class="result">
-        <div class="kicker">Total minutes</div>
-        <div class="big" id="partOutMin">—</div>
-        <div class="sec" id="partOutPretty"></div>
-        <div class="eq" id="partEq"></div>
+      <div class="lcd">
+        <div class="label">Total minutes</div>
+        <div class="value" id="partOutMin">0</div>
+        <div class="subline" id="partOutPretty"></div>
       </div>
-    </div>
-  </section>
+      <div class="breakdown" id="partEq"></div>
+    </section>
 
-  <section class="panel" id="panel-chart" role="tabpanel">
-    <div class="card">
-      <h2>Time conversion chart</h2>
-      <p class="hint">Common decimal-hour to minute values (hour = 60 min).</p>
-      <table>
-        <thead>
-          <tr><th>Decimal hours</th><th>Minutes</th><th>Clock</th></tr>
-        </thead>
-        <tbody id="chartBody"></tbody>
-      </table>
-    </div>
-  </section>
+    <!-- CALCULATOR -->
+    <section class="panel" id="panel-calc">
+      <div class="lcd" style="min-height:88px">
+        <div class="label">Calculator</div>
+        <div class="value" id="calcDisplay" style="font-size:2rem">0</div>
+        <div class="subline" id="calcExpr"></div>
+      </div>
+      <div class="keys">
+        <button type="button" class="key warn" data-k="C">C</button>
+        <button type="button" class="key op" data-k="Back">⌫</button>
+        <button type="button" class="key op" data-k="%">%</button>
+        <button type="button" class="key op" data-k="/">÷</button>
+
+        <button type="button" class="key" data-k="7">7</button>
+        <button type="button" class="key" data-k="8">8</button>
+        <button type="button" class="key" data-k="9">9</button>
+        <button type="button" class="key op" data-k="*">×</button>
+
+        <button type="button" class="key" data-k="4">4</button>
+        <button type="button" class="key" data-k="5">5</button>
+        <button type="button" class="key" data-k="6">6</button>
+        <button type="button" class="key op" data-k="-">−</button>
+
+        <button type="button" class="key" data-k="1">1</button>
+        <button type="button" class="key" data-k="2">2</button>
+        <button type="button" class="key" data-k="3">3</button>
+        <button type="button" class="key op" data-k="+">+</button>
+
+        <button type="button" class="key wide" data-k="0">0</button>
+        <button type="button" class="key" data-k=".">.</button>
+        <button type="button" class="key accent" data-k="=">=</button>
+      </div>
+    </section>
+
+    <!-- CHART -->
+    <section class="panel" id="panel-chart">
+      <p class="hint">Decimal hours → minutes. Before-decimal hours × 60.</p>
+      <div class="chart-wrap">
+        <table>
+          <thead>
+            <tr><th>Decimal</th><th>Before→min</th><th>After→min</th><th>Total min</th><th>Clock</th></tr>
+          </thead>
+          <tbody id="chartBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
 
   <script>
   (function () {
-    function fmtMin(m) {
-      if (!isFinite(m) || m < 0) return "—";
-      var total = Math.round(m * 1000) / 1000;
-      var whole = Math.floor(total + 1e-9);
-      var frac = total - whole;
-      var h = Math.floor(whole / 60);
-      var mm = whole % 60;
-      var parts = [];
-      if (h) parts.push(h + (h === 1 ? " hr" : " hrs"));
-      parts.push(mm + (mm === 1 ? " min" : " mins"));
-      if (frac > 1e-6) parts.push("(" + total + " min exact)");
-      return parts.join(" ");
+    function splitDec(d) {
+      if (!isFinite(d) || d < 0) return { whole: 0, frac: 0, wholeMin: 0, fracMin: 0, totalMin: 0 };
+      var whole = Math.floor(d + 1e-12);
+      var frac = d - whole;
+      var wholeMin = whole * 60;
+      var fracMin = frac * 60;
+      return { whole: whole, frac: frac, wholeMin: wholeMin, fracMin: fracMin, totalMin: wholeMin + fracMin };
+    }
+    function round(n, p) {
+      var m = Math.pow(10, p);
+      return Math.round(n * m) / m;
     }
     function clockFromMin(m) {
-      if (!isFinite(m)) return "";
       var whole = Math.round(m);
       var h = Math.floor(whole / 60);
       var mm = whole % 60;
       return h + ":" + String(mm).padStart(2, "0");
+    }
+    function prettyMin(m) {
+      var whole = Math.floor(m + 1e-9);
+      var h = Math.floor(whole / 60);
+      var mm = whole % 60;
+      var bits = [];
+      if (h) bits.push(h + (h === 1 ? " hr" : " hrs"));
+      bits.push(mm + " min");
+      return bits.join(" + ");
     }
     function num(el) {
       var v = parseFloat(el.value);
@@ -194,6 +293,7 @@
     var minIn = document.getElementById("minIn");
     var decOutMin = document.getElementById("decOutMin");
     var decOutPretty = document.getElementById("decOutPretty");
+    var decBreak = document.getElementById("decBreak");
     var minOutDec = document.getElementById("minOutDec");
     var partDec = document.getElementById("partDec");
     var partQty = document.getElementById("partQty");
@@ -205,33 +305,43 @@
     function updateFromDec() {
       var d = num(decIn);
       if (!isFinite(d)) {
-        decOutMin.textContent = "—";
-        decOutPretty.textContent = "";
+        decOutMin.textContent = "0";
+        decOutPretty.textContent = "0 hrs + 0 min";
+        decBreak.innerHTML = "Before decimal: <strong>0</strong> hr → <strong>0</strong> min<br />After decimal: <strong>0.00</strong> → <strong>0</strong> min";
         return;
       }
-      var mins = d * 60;
-      decOutMin.textContent = (Math.round(mins * 1000) / 1000).toLocaleString(undefined, { maximumFractionDigits: 3 });
-      decOutPretty.textContent = fmtMin(mins) + " · " + clockFromMin(mins);
+      var s = splitDec(d);
+      var total = round(s.totalMin, 3);
+      decOutMin.textContent = total.toLocaleString(undefined, { maximumFractionDigits: 3 });
+      decOutPretty.textContent = prettyMin(total) + " · " + clockFromMin(total);
+      decBreak.innerHTML =
+        "Before decimal: <strong>" + s.whole + "</strong> hr → <strong>" + s.wholeMin + "</strong> min<br />" +
+        "After decimal: <strong>" + round(s.frac, 4).toFixed(4).replace(/0+$/, "0").replace(/\.$/, "") + "</strong> → <strong>" + round(s.fracMin, 3) + "</strong> min";
       if (!syncing) {
         syncing = true;
-        minIn.value = String(Math.round(mins * 1000) / 1000);
-        minOutDec.textContent = (Math.round(d * 10000) / 10000).toString();
+        minIn.value = String(total);
+        minOutDec.textContent = String(round(d, 5));
         syncing = false;
       }
     }
     function updateFromMin() {
       var m = num(minIn);
       if (!isFinite(m)) {
-        minOutDec.textContent = "—";
+        minOutDec.textContent = "0";
         return;
       }
       var d = m / 60;
-      minOutDec.textContent = (Math.round(d * 100000) / 100000).toString();
+      minOutDec.textContent = String(round(d, 5));
       if (!syncing) {
         syncing = true;
-        decIn.value = String(Math.round(d * 100000) / 100000);
-        decOutMin.textContent = (Math.round(m * 1000) / 1000).toLocaleString(undefined, { maximumFractionDigits: 3 });
-        decOutPretty.textContent = fmtMin(m) + " · " + clockFromMin(m);
+        decIn.value = String(round(d, 5));
+        var s = splitDec(d);
+        var total = round(s.totalMin, 3);
+        decOutMin.textContent = total.toLocaleString(undefined, { maximumFractionDigits: 3 });
+        decOutPretty.textContent = prettyMin(total) + " · " + clockFromMin(total);
+        decBreak.innerHTML =
+          "Before decimal: <strong>" + s.whole + "</strong> hr → <strong>" + s.wholeMin + "</strong> min<br />" +
+          "After decimal: <strong>" + round(s.frac, 4) + "</strong> → <strong>" + round(s.fracMin, 3) + "</strong> min";
         syncing = false;
       }
     }
@@ -239,16 +349,19 @@
       var d = num(partDec);
       var q = num(partQty);
       if (!isFinite(d) || !isFinite(q)) {
-        partOutMin.textContent = "—";
+        partOutMin.textContent = "0";
         partOutPretty.textContent = "";
         partEq.textContent = "";
         return;
       }
-      var mins = d * 60 * q;
-      var rounded = Math.round(mins * 1000) / 1000;
-      partOutMin.textContent = rounded.toLocaleString(undefined, { maximumFractionDigits: 3 });
-      partOutPretty.textContent = fmtMin(mins) + (mins >= 60 ? " · " + clockFromMin(mins) : "");
-      partEq.textContent = d + " hr × " + q + " pcs × 60 = " + rounded + " min";
+      var s = splitDec(d);
+      var perMin = s.totalMin;
+      var total = round(perMin * q, 3);
+      partOutMin.textContent = total.toLocaleString(undefined, { maximumFractionDigits: 3 });
+      partOutPretty.textContent = prettyMin(total) + (total >= 60 ? " · " + clockFromMin(total) : "");
+      partEq.innerHTML =
+        "Per part: before <strong>" + s.whole + "</strong> hr → <strong>" + s.wholeMin + "</strong> min, after → <strong>" + round(s.fracMin, 3) + "</strong> min<br />" +
+        "<strong>" + round(perMin, 3) + "</strong> min × <strong>" + q + "</strong> = <strong>" + total + "</strong> min";
     }
 
     decIn.addEventListener("input", updateFromDec);
@@ -256,34 +369,93 @@
     partDec.addEventListener("input", updateParts);
     partQty.addEventListener("input", updateParts);
 
-    // Chart: 0.00 to 1.00 by 0.01, plus a few over-hour
+    // Chart
     var body = document.getElementById("chartBody");
     var rows = [];
     for (var i = 0; i <= 100; i++) {
       var dec = i / 100;
-      var mins = dec * 60;
-      rows.push([dec.toFixed(2), (Math.round(mins * 100) / 100).toString(), clockFromMin(mins)]);
+      var s = splitDec(dec);
+      rows.push([dec.toFixed(2), String(s.wholeMin), String(round(s.fracMin, 2)), String(round(s.totalMin, 2)), clockFromMin(s.totalMin)]);
     }
     [1.25, 1.5, 1.75, 2, 2.5, 3, 4, 5, 8].forEach(function (dec) {
-      var mins = dec * 60;
-      rows.push([dec.toFixed(2), String(mins), clockFromMin(mins)]);
+      var s = splitDec(dec);
+      rows.push([dec.toFixed(2), String(s.wholeMin), String(round(s.fracMin, 2)), String(round(s.totalMin, 2)), clockFromMin(s.totalMin)]);
     });
     body.innerHTML = rows.map(function (r) {
-      return "<tr><td>" + r[0] + "</td><td>" + r[1] + "</td><td>" + r[2] + "</td></tr>";
+      return "<tr><td>" + r[0] + "</td><td>" + r[1] + "</td><td>" + r[2] + "</td><td>" + r[3] + "</td><td>" + r[4] + "</td></tr>";
     }).join("");
 
+    // Tabs
     document.querySelectorAll(".tab").forEach(function (btn) {
       btn.addEventListener("click", function () {
         var id = btn.getAttribute("data-tab");
-        document.querySelectorAll(".tab").forEach(function (b) {
-          b.classList.toggle("on", b === btn);
-          b.setAttribute("aria-selected", b === btn ? "true" : "false");
-        });
-        document.querySelectorAll(".panel").forEach(function (p) {
-          p.classList.toggle("on", p.id === "panel-" + id);
-        });
+        document.querySelectorAll(".tab").forEach(function (b) { b.classList.toggle("on", b === btn); });
+        document.querySelectorAll(".panel").forEach(function (p) { p.classList.toggle("on", p.id === "panel-" + id); });
       });
     });
+
+    // Basic calculator
+    var calcDisplay = document.getElementById("calcDisplay");
+    var calcExpr = document.getElementById("calcExpr");
+    var cur = "0";
+    var prev = null;
+    var op = null;
+    var fresh = false;
+
+    function showCalc() {
+      calcDisplay.textContent = cur;
+      calcExpr.textContent = prev != null && op ? (prev + " " + op) : "";
+    }
+    function compute(a, b, operator) {
+      a = parseFloat(a); b = parseFloat(b);
+      if (!isFinite(a) || !isFinite(b)) return "Error";
+      var r;
+      if (operator === "+") r = a + b;
+      else if (operator === "-") r = a - b;
+      else if (operator === "*") r = a * b;
+      else if (operator === "/") r = b === 0 ? NaN : a / b;
+      else return b;
+      if (!isFinite(r)) return "Error";
+      return String(round(r, 10));
+    }
+    document.querySelectorAll(".key").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var k = btn.getAttribute("data-k");
+        if (k === "C") { cur = "0"; prev = null; op = null; fresh = false; showCalc(); return; }
+        if (k === "Back") {
+          if (fresh || cur === "Error") { cur = "0"; fresh = false; }
+          else cur = cur.length <= 1 ? "0" : cur.slice(0, -1);
+          showCalc(); return;
+        }
+        if (k === "%") {
+          var n = parseFloat(cur);
+          if (isFinite(n)) cur = String(round(n / 100, 10));
+          showCalc(); return;
+        }
+        if (k === "=") {
+          if (op && prev != null) {
+            cur = compute(prev, cur, op);
+            prev = null; op = null; fresh = true;
+          }
+          showCalc(); return;
+        }
+        if (k === "+" || k === "-" || k === "*" || k === "/") {
+          if (op && prev != null && !fresh) cur = compute(prev, cur, op);
+          prev = cur; op = k; fresh = true;
+          showCalc(); return;
+        }
+        if (k === ".") {
+          if (fresh) { cur = "0."; fresh = false; }
+          else if (cur.indexOf(".") === -1) cur += ".";
+          showCalc(); return;
+        }
+        // digit
+        if (fresh || cur === "0" || cur === "Error") { cur = k; fresh = false; }
+        else cur += k;
+        showCalc();
+      });
+    });
+    showCalc();
   })();
   </script>
 </body>
