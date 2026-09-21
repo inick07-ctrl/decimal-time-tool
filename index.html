@@ -10,14 +10,14 @@
       --bg: #1a1c1e;
       --shell: #2a2e32;
       --shell-edge: #141618;
-      --lcd: #c5d4a3;
-      --lcd-dim: #8a9a6a;
-      --lcd-bg: #1e2818;
+      --lcd: #f0ebe3;
+      --lcd-dim: #b0aaa0;
+      --lcd-bg: #22252a;
       --key: #3a4048;
       --key-text: #f0f2f5;
       --key-op: #5a6570;
-      --key-accent: #7a8454;
-      --key-accent-text: #14180e;
+      --key-accent: #e8e2d6;
+      --key-accent-text: #1a1c1e;
       --key-warn: #8b4a3a;
       --muted: #9aa3ad;
       --line: #3d444c;
@@ -72,7 +72,7 @@
     }
     .lcd {
       background: var(--lcd-bg);
-      border: 3px solid #0f140c;
+      border: 3px solid #0e1012;
       border-radius: 10px;
       padding: 12px 14px;
       margin-bottom: 14px;
@@ -88,6 +88,16 @@
       font-size: 2.35rem; font-weight: 700; color: var(--lcd);
       letter-spacing: 0.02em; line-height: 1.1;
       word-break: break-all; min-height: 1.15em;
+    }
+    .lcd.parts-total .value {
+      font-size: 3.4rem;
+      line-height: 1.1;
+      letter-spacing: 0.02em;
+    }
+    .lcd.parts-total {
+      min-height: 110px;
+      padding-top: 14px;
+      padding-bottom: 14px;
     }
     .lcd .subline {
       font-family: "Courier New", Courier, monospace;
@@ -199,7 +209,7 @@
           <input id="partQty" type="number" inputmode="numeric" step="1" min="0" placeholder="100" />
         </div>
       </div>
-      <div class="lcd">
+      <div class="lcd parts-total">
         <div class="label">Total minutes</div>
         <div class="value" id="partOutMin">0</div>
         <div class="subline" id="partOutPretty"></div>
