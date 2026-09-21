@@ -94,10 +94,6 @@
       line-height: 1.05;
       letter-spacing: 0.04em;
     }
-    .lcd.parts-total .subline {
-      font-size: 1.15rem;
-      margin-top: 10px;
-    }
     .lcd.parts-total {
       min-height: 130px;
       padding-top: 16px;
@@ -218,9 +214,7 @@
         <input id="partSetup" type="number" inputmode="numeric" step="1" min="0" placeholder="0" />
       </div>
       <div class="lcd parts-total">
-        <div class="label">Clock time</div>
         <div class="value" id="partOutMin">0:00</div>
-        <div class="subline" id="partOutPretty"></div>
       </div>
       <div class="breakdown" id="partEq"></div>
     </section>
@@ -324,7 +318,6 @@
     var partQty = document.getElementById("partQty");
     var partSetup = document.getElementById("partSetup");
     var partOutMin = document.getElementById("partOutMin");
-    var partOutPretty = document.getElementById("partOutPretty");
     var partEq = document.getElementById("partEq");
     var syncing = false;
 
@@ -379,7 +372,6 @@
       var setup = isFinite(setupRaw) && setupRaw >= 0 ? Math.floor(setupRaw) : 0;
       if (!isFinite(d) || !isFinite(q)) {
         partOutMin.textContent = "0:00";
-        partOutPretty.textContent = "";
         partEq.textContent = "";
         return;
       }
@@ -391,8 +383,6 @@
       var outH = run.h + setup;
       var outClock = formatClock(outH, run.mm);
       partOutMin.textContent = outClock;
-      partOutPretty.textContent =
-        formatClock(run.h, run.mm) + " run + " + setup + " setup (before colon)";
       partEq.innerHTML =
         "Per part: before decimal <strong>" + s.wholeMin + "</strong> min + after <strong>" + round(s.fracMin, 3) + "</strong> min<br />" +
         "Run: <strong>" + round(perMin, 3) + "</strong> min × <strong>" + q + "</strong> = <strong>" + formatClock(run.h, run.mm) + "</strong><br />" +
