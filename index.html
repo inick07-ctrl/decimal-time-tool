@@ -202,7 +202,7 @@
 
     <!-- PARTS -->
     <section class="panel" id="panel-parts">
-      <p class="hint">Decimal × qty → run clock. Setup minutes add once (e.g. 24:00 + 5 = 24:05). Before decimal → minutes (×60).</p>
+      <p class="hint">Decimal × qty → run clock. Setup is whole minutes added to the hours (before the colon) — e.g. 24:00 + 5 = 29:00.</p>
       <div class="grid-2">
         <div class="field">
           <label for="partDec">Decimal / part</label>
@@ -215,7 +215,7 @@
       </div>
       <div class="field">
         <label for="partSetup">Setup (minutes)</label>
-        <input id="partSetup" type="number" inputmode="decimal" step="any" min="0" placeholder="0" />
+        <input id="partSetup" type="number" inputmode="numeric" step="1" min="0" placeholder="0" />
       </div>
       <div class="lcd parts-total">
         <div class="label">Clock time</div>
@@ -293,6 +293,13 @@
       var mm = whole % 60;
       return h + ":" + String(mm).padStart(2, "0");
     }
+    function clockParts(m) {
+      var whole = Math.round(m);
+      return { h: Math.floor(whole / 60), mm: whole % 60 };
+    }
+    function formatClock(h, mm) {
+      return h + ":" + String(mm).padStart(2, "0");
+    }
     function prettyMin(m) {
       var whole = Math.floor(m + 1e-9);
       var h = Math.floor(whole / 60);
@@ -368,7 +375,8 @@
       var d = num(partDec);
       var q = num(partQty);
       var setupRaw = partSetup.value.trim() === "" ? 0 : num(partSetup);
-      var setup = isFinite(setupRaw) && setupRaw >= 0 ? setupRaw : 0;
+      // Whole minutes only (no decimals)
+      var setup = isFinite(setupRaw) && setupRaw >= 0 ? Math.floor(setupRaw) : 0;
       if (!isFinite(d) || !isFinite(q)) {
         partOutMin.textContent = "0:00";
         partOutPretty.textContent = "";
@@ -378,16 +386,18 @@
       var s = splitDec(d);
       var perMin = s.totalMin;
       var runMin = round(perMin * q, 3);
-      var total = round(runMin + setup, 3);
-      partOutMin.textContent = clockFromMin(total);
+      var run = clockParts(runMin);
+      // Setup adds to hours (before the colon); minutes after colon stay the same
+      var outH = run.h + setup;
+      var outClock = formatClock(outH, run.mm);
+      partOutMin.textContent = outClock;
       partOutPretty.textContent =
-        clockFromMin(runMin) + " run + " + clockFromMin(setup) + " setup · " +
-        total.toLocaleString(undefined, { maximumFractionDigits: 3 }) + " min";
+        formatClock(run.h, run.mm) + " run + " + setup + " setup (before colon)";
       partEq.innerHTML =
         "Per part: before decimal <strong>" + s.wholeMin + "</strong> min + after <strong>" + round(s.fracMin, 3) + "</strong> min<br />" +
-        "Run: <strong>" + round(perMin, 3) + "</strong> min × <strong>" + q + "</strong> = <strong>" + clockFromMin(runMin) + "</strong><br />" +
-        "Setup: <strong>" + clockFromMin(setup) + "</strong> (once)<br />" +
-        "Clock: <strong>" + clockFromMin(runMin) + "</strong> + <strong>" + clockFromMin(setup) + "</strong> = <strong>" + clockFromMin(total) + "</strong>";
+        "Run: <strong>" + round(perMin, 3) + "</strong> min × <strong>" + q + "</strong> = <strong>" + formatClock(run.h, run.mm) + "</strong><br />" +
+        "Setup: <strong>" + setup + "</strong> min → add to hours before colon<br />" +
+        "Clock: <strong>" + run.h + "</strong> + <strong>" + setup + "</strong> = <strong>" + outH + "</strong> → <strong>" + outClock + "</strong>";
     }
 
     decIn.addEventListener("input", updateFromDec);
