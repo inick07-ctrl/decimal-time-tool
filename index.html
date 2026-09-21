@@ -198,7 +198,7 @@
 
     <!-- PARTS -->
     <section class="panel" id="panel-parts">
-      <p class="hint">Decimal × qty → run clock. Setup is whole minutes added to the hours (before the colon) — e.g. 24:00 + 5 = 29:00.</p>
+      <p class="hint">Whole number (no decimal point): setup adds to hours before the colon (24:00 + 5 → 29:00). If the part time has a decimal (e.g. 0.15), run uses normal decimal→minutes and setup adds as real minutes to that clock.</p>
       <div class="grid-2">
         <div class="field">
           <label for="partDec">Decimal / part</label>
@@ -368,26 +368,46 @@
       var d = num(partDec);
       var q = num(partQty);
       var setupRaw = partSetup.value.trim() === "" ? 0 : num(partSetup);
-      // Whole minutes only (no decimals)
+      // Setup is whole minutes only
       var setup = isFinite(setupRaw) && setupRaw >= 0 ? Math.floor(setupRaw) : 0;
       if (!isFinite(d) || !isFinite(q)) {
         partOutMin.textContent = "0:00";
         partEq.textContent = "";
         return;
       }
+      var rawDec = partDec.value.trim();
+      // Only when the part value includes a decimal point: normal decimal→minutes totaling
+      var hasDecimalPoint = rawDec.indexOf(".") !== -1;
       var s = splitDec(d);
       var perMin = s.totalMin;
       var runMin = round(perMin * q, 3);
       var run = clockParts(runMin);
-      // Setup adds to hours (before the colon); minutes after colon stay the same
-      var outH = run.h + setup;
-      var outClock = formatClock(outH, run.mm);
-      partOutMin.textContent = outClock;
-      partEq.innerHTML =
-        "Per part: before decimal <strong>" + s.wholeMin + "</strong> min + after <strong>" + round(s.fracMin, 3) + "</strong> min<br />" +
-        "Run: <strong>" + round(perMin, 3) + "</strong> min × <strong>" + q + "</strong> = <strong>" + formatClock(run.h, run.mm) + "</strong><br />" +
-        "Setup: <strong>" + setup + "</strong> min → add to hours before colon<br />" +
-        "Clock: <strong>" + run.h + "</strong> + <strong>" + setup + "</strong> = <strong>" + outH + "</strong> → <strong>" + outClock + "</strong>";
+      var outClock;
+      var eq;
+      if (hasDecimalPoint) {
+        // Normal decimal hours → minutes; setup adds as real minutes (clock carry)
+        var totalMin = round(runMin + setup, 3);
+        outClock = clockFromMin(totalMin);
+        partOutMin.textContent = outClock;
+        eq =
+          "Decimal mode (has .): normal decimal → minutes<br />" +
+          "Per part: <strong>" + round(perMin, 3) + "</strong> min (before <strong>" + s.wholeMin + "</strong> + after <strong>" + round(s.fracMin, 3) + "</strong>)<br />" +
+          "Run: <strong>" + round(perMin, 3) + "</strong> × <strong>" + q + "</strong> = <strong>" + round(runMin, 3) + "</strong> min (<strong>" + formatClock(run.h, run.mm) + "</strong>)<br />" +
+          "Setup: <strong>" + setup + "</strong> min added to total<br />" +
+          "Clock: <strong>" + formatClock(run.h, run.mm) + "</strong> + <strong>" + setup + "</strong> min = <strong>" + outClock + "</strong> (<strong>" + round(totalMin, 3) + "</strong> min)";
+      } else {
+        // No decimal point: setup adds to hours before the colon
+        var outH = run.h + setup;
+        outClock = formatClock(outH, run.mm);
+        partOutMin.textContent = outClock;
+        eq =
+          "Whole-number mode: setup adds to hours before colon<br />" +
+          "Per part: <strong>" + round(perMin, 3) + "</strong> min<br />" +
+          "Run: <strong>" + round(perMin, 3) + "</strong> × <strong>" + q + "</strong> = <strong>" + formatClock(run.h, run.mm) + "</strong><br />" +
+          "Setup: <strong>" + setup + "</strong> → hours <strong>" + run.h + "</strong> + <strong>" + setup + "</strong> = <strong>" + outH + "</strong><br />" +
+          "Clock: <strong>" + outClock + "</strong>";
+      }
+      partEq.innerHTML = eq;
     }
 
     decIn.addEventListener("input", updateFromDec);
