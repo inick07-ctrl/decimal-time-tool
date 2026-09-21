@@ -90,14 +90,18 @@
       word-break: break-all; min-height: 1.15em;
     }
     .lcd.parts-total .value {
-      font-size: 3.4rem;
-      line-height: 1.1;
-      letter-spacing: 0.02em;
+      font-size: 4.2rem;
+      line-height: 1.05;
+      letter-spacing: 0.04em;
+    }
+    .lcd.parts-total .subline {
+      font-size: 1.15rem;
+      margin-top: 10px;
     }
     .lcd.parts-total {
-      min-height: 110px;
-      padding-top: 14px;
-      padding-bottom: 14px;
+      min-height: 130px;
+      padding-top: 16px;
+      padding-bottom: 16px;
     }
     .lcd .subline {
       font-family: "Courier New", Courier, monospace;
@@ -210,8 +214,8 @@
         </div>
       </div>
       <div class="lcd parts-total">
-        <div class="label">Total minutes</div>
-        <div class="value" id="partOutMin">0</div>
+        <div class="label">Clock time</div>
+        <div class="value" id="partOutMin">0:00</div>
         <div class="subline" id="partOutPretty"></div>
       </div>
       <div class="breakdown" id="partEq"></div>
@@ -359,7 +363,7 @@
       var d = num(partDec);
       var q = num(partQty);
       if (!isFinite(d) || !isFinite(q)) {
-        partOutMin.textContent = "0";
+        partOutMin.textContent = "0:00";
         partOutPretty.textContent = "";
         partEq.textContent = "";
         return;
@@ -367,11 +371,11 @@
       var s = splitDec(d);
       var perMin = s.totalMin;
       var total = round(perMin * q, 3);
-      partOutMin.textContent = total.toLocaleString(undefined, { maximumFractionDigits: 3 });
-      partOutPretty.textContent = total + " min" + (total >= 60 ? " · " + clockFromMin(total) : "");
+      partOutMin.textContent = clockFromMin(total);
+      partOutPretty.textContent = total.toLocaleString(undefined, { maximumFractionDigits: 3 }) + " total minutes";
       partEq.innerHTML =
         "Per part: before decimal <strong>" + s.wholeMin + "</strong> min + after <strong>" + round(s.fracMin, 3) + "</strong> min<br />" +
-        "<strong>" + round(perMin, 3) + "</strong> min × <strong>" + q + "</strong> = <strong>" + total + "</strong> min";
+        "<strong>" + round(perMin, 3) + "</strong> min × <strong>" + q + "</strong> = <strong>" + clockFromMin(total) + "</strong> (" + total + " min)";
     }
 
     decIn.addEventListener("input", updateFromDec);
